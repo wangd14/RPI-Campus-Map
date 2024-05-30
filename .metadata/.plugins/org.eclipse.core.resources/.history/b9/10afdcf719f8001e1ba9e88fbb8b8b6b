@@ -1,0 +1,71 @@
+package hw4;
+
+
+/**
+ * Vertex represents an immutable node.
+ * The main purpose of this class is to store value
+ * It is also in sequence with the Edge class aids in the creation of the Graph class
+ * Specification field: val, String value
+ */
+public class Vertex {
+	
+	private final String val;
+	
+	/* Abstract Function:
+	 * A Vertex v is NONE if v.val = "", otherwise it is the value set by
+	 * the constructor
+	 * 
+	 * Representational Invariant:
+	 * val holds any string
+	 */
+	
+	/*A constant that holds the "" value of type Vertex*/
+	public static final Vertex NONE = new Vertex();
+	
+	/** default constructor that sets the value to empty string
+	 * @requires: None
+	 * @modifies: this.val
+	 * @effects: constructs a new Vertex = ""
+	 * @throws: None
+	 * @returns: None
+	 */
+	public Vertex() {
+		this.val = "";
+	}
+	
+	/** constructor that sets the value to val
+	 * @param: val The value of the new vertex
+	 * @requires: val
+	 * @modifies: this.val
+	 * @effects: constructs a new Vertex = val
+	 * @throws: None
+	 * @returns: None
+	 */
+	public Vertex(String val) {
+		this.val = new String(val);
+	}
+	
+	/** returns the value of the vertex
+	 * @requires: None
+	 * @modifies: None
+	 * @effects: None
+	 * @throws: None
+	 * @returns: a new String with value of this.val
+	 */
+	public String getVal() {
+		return new String(val);
+	}
+	
+	/** returns true if the values of the vertices are equal
+	 * @param: a, a Vertex object
+	 * 		   b, a Vertex object
+	 * @requires: a, b
+	 * @modifies: None
+	 * @effects: None
+	 * @throws: None
+	 * @returns: True if a.val.equals(b.val), otherwise False
+	 */
+	public static boolean checkEquals(Vertex a, Vertex b) {
+		return a.val.equals(b.val);
+	}
+}

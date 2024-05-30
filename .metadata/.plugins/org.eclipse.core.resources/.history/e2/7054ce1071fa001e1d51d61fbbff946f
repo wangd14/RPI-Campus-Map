@@ -1,0 +1,33 @@
+package hw6;
+
+import java.util.LinkedList;
+
+import hw4.Edge;
+
+public class PathWithTotalCost {
+	private LinkedList<Edge<String,Double>> path;
+	private double cost;
+	
+	public PathWithTotalCost() {
+		path = new LinkedList<Edge<String, Double>>();
+		cost = 0.0;
+	}
+	
+	public PathWithTotalCost(LinkedList<Edge<String, Double>> path, double cost) {
+		this.path = new LinkedList<Edge<String, Double>>(path);
+		this.cost = cost;
+	}
+	
+	public boolean addPath(Edge<String, Double> e) {
+		cost += e.getWeight();
+		return path.add(e);
+	}
+	
+	public double getCost() {
+		return this.cost;
+	}
+	
+	public LinkedList<Edge<String, Double>> getPath(){
+		return new LinkedList<Edge<String, Double>>(this.path);
+	}
+}

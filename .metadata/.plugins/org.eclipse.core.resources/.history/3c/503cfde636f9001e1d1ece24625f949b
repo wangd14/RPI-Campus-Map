@@ -1,0 +1,78 @@
+package hw4;
+
+/**
+ * An Edge is an immutable Edge on a graph of nodes with a String value weight,
+ * a starting Vertex startVertex, and an ending Vertex destVertex.
+ * The main purpose of this class is to store value as well as the connection between two vertices.
+ * It is also in sequence with the Vertex class aids in the creation of the Graph class
+ * Specification field: startVertex, destVertex, weight
+ */
+public class Edge<T> {
+	private final Vertex startVertex;
+	private final Vertex destVertex;
+	private final T weight;
+	
+	/* Abstract Function:
+	 * An Edge e is a connection from startVertex to destVertex with a value of weight
+	 * 
+	 * Representational Invariant:
+	 * weight holds any string
+	 * startVertex and destVertex hold the Vertex ADT
+	 * startVertex and destVertex can be the same and there can be duplicates
+	 */
+	
+	/**
+	 * @param startVertex the starting vertex
+	 * 		  destVertex the destination vertex
+	 * 		  weight the value of the edge
+	 * 
+	 * @requires: startVertex, destVertex, weight
+	 * @modifies: this.startVertex, this.destVertex, this.weight
+	 * @effects: constructs a new Edge with startVertex as the starting point
+	 * and destVertex as the destination point with the weight as the value assigned to this edge
+	 * @throws: None
+	 * @returns: None
+	 */
+	public Edge(Vertex startVertex, Vertex destVertex, String weight) {
+		this.startVertex = new Vertex(startVertex.getVal());
+		this.destVertex = new Vertex(destVertex.getVal());
+		this.weight = new String(weight);
+	}
+	
+	/**
+	 * @param: None
+	 * @requires: None
+	 * @modifies: None
+	 * @effects: None
+	 * @throws: None
+	 * @returns: A copy of the starting vertex, startVertex
+	 */
+	public Vertex getStartVertex() {
+		return new Vertex(startVertex.getVal());
+	}
+	
+	/**
+	 * @param: None
+	 * @requires: None
+	 * @modifies: None
+	 * @effects: None
+	 * @throws: None
+	 * @returns: A copy of the destination vertex, destVertex
+	 */
+	public Vertex getDestVertex() {
+		return new Vertex(destVertex.getVal());
+	}
+	
+	/**
+	 * @param: None
+	 * @requires: None
+	 * @modifies: None
+	 * @effects: None
+	 * @throws: None
+	 * @returns: Weight/value of the edge, weight
+	 */
+	public String getWeight() {
+		return new String(weight);
+	}
+
+}

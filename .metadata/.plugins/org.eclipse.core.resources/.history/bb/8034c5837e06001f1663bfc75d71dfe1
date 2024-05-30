@@ -1,0 +1,16 @@
+package hw8;
+
+
+
+import hw7.CampusPaths;
+
+
+public class RPICampusPathsMain{
+	
+	 public static void main(String[] args) {
+		 	CampusPaths cp = new CampusPaths();
+		 	MapView mv = new MapView();
+			cp.addObserver(mv);
+			cp.notifyObservers();
+	    }
+}

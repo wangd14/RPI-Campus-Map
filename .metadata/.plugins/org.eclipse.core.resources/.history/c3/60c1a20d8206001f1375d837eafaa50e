@@ -1,0 +1,53 @@
+package hw8;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import hw7.CampusPaths;
+import javafx.scene.Group;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.stage.Popup;
+
+public class CampusMapView implements Observer{
+    private ImageView imageView;
+    private Pane pane;
+    private Button resetButton;
+    private Button zoomInButton;
+    private Button zoomOutButton;
+    private Label messageLabel;
+    
+    @Override
+    public void update(Observable obj, Object arg) {
+	}
+
+    public void addCircle(Circle circle) {
+        pane.getChildren().add(circle);
+    }
+
+    public void removeCircle(Circle circle) {
+        pane.getChildren().remove(circle);
+    }
+
+    public void drawPath(Group group) {
+        pane.getChildren().add(group);
+    }
+
+    public void showMessage(String message) {
+        Popup popup = new Popup();
+        Label label = new Label(message);
+        label.setStyle("-fx-background-color: white; -fx-padding: 10px; -fx-border-color: black; -fx-border-width: 2px;");
+        popup.getContent().add(label);
+        popup.setAutoHide(true);
+        popup.show(pane.getScene().getWindow());
+    }
+
+    // Other methods to update the view as needed
+}

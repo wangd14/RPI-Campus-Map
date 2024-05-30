@@ -1,0 +1,26 @@
+package hw6;
+
+import hw4.Vertex;
+
+public class VertexWithDistance<T extends Comparable<T>> {
+	private Vertex<T> v;
+	private double d;
+	
+	public VertexWithDistance() {
+		this.v = new Vertex<T>();
+		this.d = 0.0;
+	}
+	
+	public VertexWithDistance(Vertex<T> v, double d) {
+		this.v = v;
+		this.d = d;
+	}
+	
+	public Vertex<T> getVertex() {
+		return v;
+	}
+	
+	public double getDistance() {
+		return d;
+	}
+}

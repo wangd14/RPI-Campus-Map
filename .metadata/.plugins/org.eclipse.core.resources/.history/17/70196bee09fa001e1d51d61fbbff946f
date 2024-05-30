@@ -1,0 +1,26 @@
+package hw6;
+
+import hw4.Vertex;
+
+public class VertexWithDistance {
+	private Vertex v;
+	private double d;
+	
+	public VertexWithDistance() {
+		this.v = new Vertex();
+		this.d = 0.0;
+	}
+	
+	public VertexWithDistance(Vertex v, double d) {
+		this.v = v;
+		this.d = d;
+	}
+	
+	public Vertex getVertex() {
+		return v;
+	}
+	
+	public double getDistance() {
+		return d;
+	}
+}

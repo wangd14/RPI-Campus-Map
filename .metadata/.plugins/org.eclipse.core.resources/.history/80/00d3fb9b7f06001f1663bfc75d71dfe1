@@ -1,0 +1,334 @@
+package hw8;
+
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Observable;
+import java.util.Observer;
+
+import hw4.Edge;
+import hw7.Building;
+import hw7.CampusPaths;
+import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+
+@SuppressWarnings("deprecation")
+public class RPICampusPathsMain extends Application{
+	private static final double MAX_IMAGE_WIDTH = 600*2057/1921;
+    private static final double MAX_IMAGE_HEIGHT = 600;
+    private CampusPaths cp;
+    private Circle selectedCircle1;
+    private Circle selectedCircle2;
+    
+
+	@Override
+	public void start(Stage stage) {
+		//creating the image object
+		try {
+			// Load the image
+            InputStream stream = new FileInputStream("data/RPI_campus_map_2010_extra_nodes_edges.png");
+            Image image = new Image(stream);
+
+            // Calculate scaling factors to fit the image within the maximum dimensions
+            double widthScale = MAX_IMAGE_WIDTH / image.getWidth();
+            double heightScale = MAX_IMAGE_HEIGHT / image.getHeight();
+            double scale = Math.min(widthScale, heightScale);
+            double width = scale * image.getWidth();
+            double height = scale * image.getHeight();
+
+            // Create the image view
+            ImageView imageView = new ImageView(image);
+            imageView.setPreserveRatio(true); // Preserve aspect ratio
+            imageView.setFitWidth(width);
+            imageView.setFitHeight(height);
+            imageView.setManaged(false);
+            imageView.setLayoutX(0);
+            imageView.setLayoutY(0);
+
+            // Set the layout position of the ImageView to the top-left corner of the Pane
+            imageView.setLayoutX(0);
+            imageView.setLayoutY(0);
+
+            cp = new CampusPaths();
+            cp.buildGraph();
+            
+            Pane pane = new Pane();
+            pane.setPrefSize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+
+            pane.getChildren().add(imageView);
+            
+            pane.setLayoutX(0);
+            pane.setLayoutY(0);
+            
+            for(Building b: cp.getGraph().getVertices()) {
+            	if(b.getId()>92) {
+            		continue;
+            	}
+            	Circle circle = new Circle(3);
+            	circle.setFill(Color.RED);
+            	circle.setLayoutX(MAX_IMAGE_WIDTH*((double)b.getXCoord()/2057) -14); //- 20
+            	circle.setLayoutY(MAX_IMAGE_HEIGHT*((double)b.getYCoord()/1921) -17); // + 10
+            	circle.setId(String.valueOf(b.getId()));
+            	circle.setOnMouseClicked(event -> {
+            		handleCircleClicked(circle, pane, imageView);
+                });
+            	pane.getChildren().add(circle);
+            }
+            
+            ScrollPane scrollPane = new ScrollPane(imageView);
+            scrollPane.setFitToWidth(false);
+            scrollPane.setFitToHeight(false);
+//            scrollPane.setAlignment(Pos.TOP_LEFT);
+
+           
+            scrollPane.setHvalue(0.0);
+            scrollPane.setVvalue(0.0);
+            scrollPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
+                // Calculate the offset based on the viewport's view bounds
+                double xOffset = -scrollPane.getHvalue() * (imageView.getFitWidth() - newValue.getWidth());
+                double yOffset = -scrollPane.getVvalue() * (imageView.getFitHeight() - newValue.getHeight());
+
+                // Set the layout positions of the circles based on the offset
+                for (Node node : pane.getChildren()) {
+                    if (node instanceof Circle) {
+                        Circle circle = (Circle) node;
+                        circle.setLayoutX(circle.getLayoutX() + xOffset);
+                        circle.setLayoutY(circle.getLayoutY() + yOffset);
+                    }
+                }
+            });
+
+
+           
+            ChangeListener<Number> resizeListener = (obs, oldVal, newVal) -> {
+                // Calculate new scaling factors
+            	
+                double widthS = stage.getWidth() / imageView.getFitWidth();
+                double heightS = stage.getHeight() / imageView.getFitHeight();
+                double sc = Math.min(widthS, heightS);
+
+
+
+                // Apply the new scaling factor to the image view
+                imageView.setScaleX(sc);
+                imageView.setScaleY(sc);
+                pane.setScaleX(sc);
+                pane.setScaleY(sc);
+//                scrollPane.setLayoutX(stage.getWidth());
+//                scrollPane.setLayoutY(stage.getHeight());
+//                scrollPane.setScaleX(sc);
+//                scrollPane.setScaleY(sc);
+                pane.setLayoutX(0);
+                pane.setLayoutY(0);
+                scrollPane.setFitToHeight(true);
+                scrollPane.setFitToWidth(true);
+                scrollPane.setHvalue(0.0);
+                scrollPane.setVvalue(0.0);
+            };
+
+            // Add the listener to handle window resize events
+            stage.widthProperty().addListener(resizeListener);
+            stage.heightProperty().addListener(resizeListener);
+            
+//            Circle circle = new Circle(1);
+//            circle.setFill(Color.RED);
+//
+//            
+//            circle.setLayoutX(5.5);
+//            circle.setLayoutY(5.5);
+//            
+//            pane.getChildren().add(circle);
+
+            // Center the image within the application window with equal margins on each side
+//            double xOffset = (MAX_IMAGE_WIDTH - imageView.getFitWidth()) / 2;
+//            double yOffset = (MAX_IMAGE_HEIGHT - imageView.getFitHeight()) / 2;
+//            imageView.setLayoutX(xOffset);
+//            imageView.setLayoutY(yOffset);
+
+            
+            
+            Button resetButton = new Button("Reset");
+            resetButton.setOnAction(event -> {
+                // Reset selected circles
+                selectedCircle1 = null;
+                selectedCircle2 = null;
+
+                // Clear all paths drawn on the map
+                pane.getChildren().removeIf(node -> node instanceof Group);
+
+                // Reset the view to its default state
+                imageView.setScaleX(1.0);
+                imageView.setScaleY(1.0);
+                imageView.setTranslateX(0);
+                imageView.setTranslateY(0);
+                pane.setScaleX(1.0);
+                pane.setScaleY(1.0);
+                pane.setTranslateX(0);
+                pane.setTranslateY(0);
+                
+            });
+            
+            Button zoomInButton = new Button("Zoom In");
+            zoomInButton.setOnAction(event -> {
+                imageView.setScaleX(imageView.getScaleX() * 1.1);
+                imageView.setScaleY(imageView.getScaleY() * 1.1);
+                pane.setScaleX(pane.getScaleX() * 1.1);
+                pane.setScaleY(pane.getScaleY() * 1.1);
+            });
+
+            Button zoomOutButton = new Button("Zoom Out");
+            zoomOutButton.setOnAction(event -> {
+                imageView.setScaleX(imageView.getScaleX() / 1.1);
+                imageView.setScaleY(imageView.getScaleY() / 1.1);
+                pane.setScaleX(pane.getScaleX() / 1.1);
+                pane.setScaleY(pane.getScaleY() / 1.1);
+            });
+            
+            HBox buttonBox = new HBox(10); // 10 is the spacing between buttons
+            buttonBox.setAlignment(Pos.TOP_RIGHT); // Align buttons to the top-right corner
+            buttonBox.setPadding(new Insets(10)); // Add padding around the buttons
+
+            buttonBox.getChildren().addAll(resetButton, zoomInButton, zoomOutButton);
+
+            
+            StackPane stackPane = new StackPane();
+            stackPane.getChildren().addAll(imageView, pane, buttonBox);
+
+//            stackPane.getChildren().add(resetButton);
+//            
+//            HBox buttonBox = new HBox(10); // 10 is the spacing between buttons
+//            buttonBox.setAlignment(Pos.TOP_RIGHT); // Align buttons to the top-right corner
+//            buttonBox.setPadding(new Insets(10)); // Add padding around the buttons
+//            
+//            buttonBox.getChildren().addAll(resetButton, zoomInButton, zoomOutButton);
+
+
+            
+            // Set up the Scene
+            Group root = new Group(scrollPane);
+//            root.getChildren().add(buttonBox);
+            root.getChildren().add(pane);
+            root.getChildren().add(stackPane);
+            
+            Scene scene = new Scene(root, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+            
+            scrollPane.prefWidthProperty().bind(scene.widthProperty());
+            scrollPane.prefHeightProperty().bind(scene.heightProperty());
+            stage.setScene(scene);
+            stage.setTitle("RPI Campus Map");
+            stage.show();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      
+	      
+	 }
+	
+	private void handleCircleClicked(Circle circle, Pane pane, ImageView imageView) {
+        if (selectedCircle1 == null) {
+            selectedCircle1 = circle;
+            System.out.println("First circle selected: " + circle.getId());
+            
+            for(Node n: pane.getChildren()) {
+            	if(n instanceof Circle) {
+            		Circle c = (Circle) n;
+            		c.setFill(Color.RED);
+            	}
+            }
+            
+            for(Node n: pane.getChildren()) {
+            	if(n instanceof Group) {
+            		pane.getChildren().remove(n);
+            		break;
+            	}
+            }
+            circle.setFill(Color.BLUE);
+        } else if (selectedCircle2 == null && circle != selectedCircle1) {
+            selectedCircle2 = circle;
+            System.out.println("Second circle selected: " + circle.getId());
+            circle.setFill(Color.BLUE);
+            // Call a function with the IDs of both circles
+            
+            cp.getDirection(selectedCircle1.getId(), selectedCircle2.getId());
+            
+            if(cp.getPath()!=null) {
+            	double x = selectedCircle1.getLayoutX();
+                double y = selectedCircle1.getLayoutY();
+                Group group = new Group();
+                for(Edge<Building, Double> e: cp.getPath().getPath()) {
+                	double nextX = MAX_IMAGE_WIDTH*((double)e.getDestVertex().getXCoord()/2057) -14;
+                	double nextY = MAX_IMAGE_HEIGHT*((double)e.getDestVertex().getYCoord()/1921) -17;
+                	Line l = new Line(x, y, nextX, nextY);
+                	l.setFill(Color.ORANGE);
+                	x = nextX;
+                	y = nextY;
+                	group.getChildren().add(l);
+                }
+                
+                pane.getChildren().add(group);
+                
+                // Reset selected circles
+                selectedCircle1.setFill(Color.GREEN);
+                selectedCircle2.setFill(Color.GREEN);
+                selectedCircle1 = null;
+                selectedCircle2 = null;
+                
+            }
+            else {
+            	showPopup("No path found.");
+            	        
+            	for(Node n: pane.getChildren()) {
+                	if(n instanceof Circle) {
+                		Circle c = (Circle) n;
+                		c.setFill(Color.RED);
+                	}
+                }
+            	selectedCircle1 = null;
+                selectedCircle2 = null;
+            }
+        }
+    }
+	
+	private void showPopup(String message) {
+        Popup popup = new Popup();
+        Label label = new Label(message);
+        label.setStyle("-fx-background-color: white; -fx-padding: 10px; -fx-border-color: black; -fx-border-width: 2px;");
+        popup.getContent().add(label);
+        popup.setAutoHide(true);
+        popup.show(selectedCircle2.getScene().getWindow());
+    }
+	
+
+
+	 public static void main(String[] args) {
+	        launch(args);
+	    }
+}

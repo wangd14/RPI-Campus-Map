@@ -1,0 +1,174 @@
+package hw6;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+import hw4.Edge;
+import hw4.Graph;
+import hw4.Vertex;
+import hw5.ProfessorParser;
+
+public class LegoPaths{
+	
+	private Graph<String, Double> lego;
+	
+	public void createNewGraph(String filename) {
+		this.lego = new Graph<String, Double>();
+		Map<String, Set<String>> legoSets = new HashMap<String, Set<String>>();
+		Set<String> legoPieces = new HashSet<String>();
+		try {
+			ProfessorParser.readData(filename, legoSets, legoPieces);
+		}catch( IOException e) {
+			e.printStackTrace();
+		}
+		
+		Iterator<String> legoItr = legoPieces.iterator();
+		
+		while(legoItr.hasNext()) {
+			
+			String tmp = legoItr.next();
+			
+			lego.addVertex(new Vertex<String>(tmp));
+		}
+		
+		
+		Map<String, Map<String, Integer>> pieceCounts = new HashMap<String, Map<String, Integer>>();
+		
+		Iterator<String> legoSetsItr = legoSets.keySet().iterator();
+		while(legoSetsItr.hasNext()) {
+			String legoSet = legoSetsItr.next();
+			String[] legoSetPieces = legoSets.get(legoSet).toArray(new String[legoSets.get(legoSet).size()]);
+			
+			for(int i=0; i<legoSetPieces.length; i++) {
+				String s1 = legoSetPieces[i];
+				for(int j=0; j<legoSetPieces.length; j++) {
+					String s2 = legoSetPieces[j];
+					
+					if(s1.equals(s2)) {
+						continue;
+					}
+
+					if(pieceCounts.containsKey(s1)) {
+						if(pieceCounts.get(s1).containsKey(s2)) {
+							pieceCounts.get(s1).put(s2, pieceCounts.get(s1).get(s2)+1);
+						}
+						else {
+							pieceCounts.get(s1).put(s2, 1);
+						}
+					}
+					else {
+						Map<String, Integer> count = new HashMap<String, Integer>();
+						count.put(s2, 1);
+						pieceCounts.put(s1, count);
+					}
+					
+				}
+			}
+			
+			//Go through the map, add edges as needed
+			Iterator<String> strItr = pieceCounts.keySet().iterator();
+			while(strItr.hasNext()) {
+				String vertexValue = strItr.next();
+				Iterator<String> innerCountItr = pieceCounts.get(vertexValue).keySet().iterator();
+				while(innerCountItr.hasNext()) {
+					String vertex2Value = innerCountItr.next();
+					int similarCount = pieceCounts.get(vertexValue).get(vertex2Value);
+					lego.addEdge(new Edge<String, Double>(new Vertex<String>(vertexValue), new Vertex<String>(vertex2Value), 1.0/similarCount));
+				}
+				
+				lego.addEdge(new Edge<String, Double>(new Vertex<String>(vertexValue), new Vertex<String>(vertexValue), 0.0));
+			}
+			
+		}
+	}
+	
+	public String findPath(String PART1, String PART2) {
+		
+//		ArrayList<Vertex<String>> ver = lego.getVertices();
+//		boolean firstPartFound = false;
+//		boolean secondPartFound = false;
+//		for(int i=0; i<ver.size(); i++) {
+//			if(ver.get(i).getVal().equals(PART1)) {
+//				System.out.println(ver.get(i).getVal());
+//				firstPartFound = true;
+//			}
+//			if(ver.get(i).getVal().equals(PART2)) {
+//				secondPartFound = true;
+//			}
+//		}
+//		
+//		if(!firstPartFound || !secondPartFound) {
+//			if(PART1.equals(PART2)) {
+//				return "unknown part " + PART1 + "\n";
+//			}
+//			if(!firstPartFound && !secondPartFound) {
+//				return "unknown part " + PART1 + "\nunknown part " + PART2 + "\n";
+//			}
+//			if(!firstPartFound) {
+//				return "unknown part " + PART1 + "\n";
+//			}
+//			if(!secondPartFound) {
+//				return "unknown part " + PART2 + "\n";
+//			}
+//		}
+		
+		PriorityQueue<PathWithTotalCost> active = new PriorityQueue<PathWithTotalCost>(1);
+		Map<String, PathWithTotalCost> paths = new HashMap<String, PathWithTotalCost>();
+		Set<String> finished = new HashSet<String>(0);
+		
+		active.add(new PathWithTotalCost(new Edge<String, Double>(new Vertex<String>(PART1), new Vertex<String>(PART1), 0.0), 0.0));
+		
+		while(!active.isEmpty()) {
+			PathWithTotalCost minPath = active.remove();
+			Vertex<String> minDest = minPath.getPath().getLast().getDestVertex();
+			
+			if(minDest.getVal().equals(PART2)) {
+				
+				System.out.println("Reached End");
+			}
+			
+			if(finished.contains(minDest.getVal())) {
+				continue;
+			}
+			
+			System.out.println(minDest.getVal());
+			System.out.println(lego.getEdges().get(minDest.getVal()));
+//			for(int i=0; i<lego.getEdges().get(minDest.getVal()).size(); i++) {
+//				
+//				if(!finished.contains(lego.getEdges().get(minDest.getVal()).get(i).getDestVertex().getVal())) {
+//					PathWithTotalCost newPath = new PathWithTotalCost(minPath.getPath(), minPath.getCost());
+//					newPath.addPath(new Edge<String, Double>(new Vertex<String>(minDest.getVal()), new Vertex<String>(lego.getEdges().get(minDest.getVal()).get(i).getDestVertex().getVal()), minPath.getCost() + lego.getEdges().get(minDest.getVal()).get(i).getWeight()));
+//					active.add(newPath);
+////					active.add(new Edge<String, Double>(new Vertex<String>(minDest.getVal()), new Vertex<String>(lego.getEdges().get(minDest.getVal()).get(i).getDestVertex().getVal()), minPath.getWeight()));
+//					/*newPath = minPath + e
+//					add newPath to active*/
+//				}
+//			}
+			
+			finished.add(minDest.getVal());
+			
+		}
+		return "could not find";
+	}
+	
+	public static void main(String[] args) {
+		LegoPaths lp = new LegoPaths();
+	
+		lp.createNewGraph("data/lego1960.csv");
+		System.out.print(lp.findPath("31367 Green Duplo Egg Base", "98138pr0080 Pearl Gold Tile Round 1 x 1 with Blue, Yellow and Black Minecraft Print"));
+//		System.out.print(lp.findPath("35480 Green Plate Special 1 x 2 Rounded with 2 Open Studs", "27ac01 Light Yellow Window 1 x 2 x 1 (old type) with Extended Lip and Solid Studs, with Fixed Glass"));
+//		System.out.println(lp.findPath("31367 Green Duplo Egg Base", "98138pr0080 Pearl Gold Tile Round 1 x 1 with Blue, Yellow and Black Minecraft Print"));
+//		System.out.print(lp.findPath("3035 Dark Gray Plate 4 x 8 to 3035 Dark Gray Plate 4 x 8", "3035 Dark Gray Plate 4 x 8 to 3035 Dark Gray Plate 4 x 8"));
+//		System.out.print(lp.findPath("2412a White Tile Special 1 x 2 Grille with Bottom Groove", "2412a White Tile Special 1 x 2 Grille with Bottom Groove"));
+	
+	}
+}

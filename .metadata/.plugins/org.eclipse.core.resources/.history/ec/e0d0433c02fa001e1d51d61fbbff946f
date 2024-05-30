@@ -1,0 +1,103 @@
+package hw6;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import hw4.Edge;
+import hw4.Graph;
+import hw4.Vertex;
+import hw5.ProfessorParser;
+
+public class LegoPaths{
+	
+	private Graph<String, Double> lego;
+	
+	public void createNewGraph(String filename) {
+		this.lego = new Graph<String, Double>();
+		Map<String, Set<String>> legoSets = new HashMap<String, Set<String>>();
+		Set<String> legoPieces = new HashSet<String>();
+		try {
+			ProfessorParser.readData(filename, legoSets, legoPieces);
+		}catch( IOException e) {
+			e.printStackTrace();
+		}
+		
+		Iterator<String> legoItr = legoPieces.iterator();
+		
+		while(legoItr.hasNext()) {
+			
+			String tmp = legoItr.next();
+			
+			lego.addVertex(new Vertex<String>(tmp));
+		}
+		
+		
+		Map<String, Map<String, Integer>> pieceCounts = new HashMap<String, Map<String, Integer>>();
+		
+		Iterator<String> legoSetsItr = legoSets.keySet().iterator();
+		while(legoSetsItr.hasNext()) {
+			String legoSet = legoSetsItr.next();
+			System.out.println(legoSet);
+			String[] legoSetPieces = legoSets.get(legoSet).toArray(new String[legoSets.get(legoSet).size()]);
+			
+			for(int i=0; i<legoSetPieces.length; i++) {
+				String s1 = legoSetPieces[i];
+				for(int j=0; j<legoSetPieces.length; j++) {
+					String s2 = legoSetPieces[j];
+					
+					if(s1.equals(s2)) {
+						continue;
+					}
+
+					if(pieceCounts.containsKey(s1)) {
+						if(pieceCounts.get(s1).containsKey(s2)) {
+							pieceCounts.get(s1).put(s2, pieceCounts.get(s1).get(s2)+1);
+						}
+						else {
+							pieceCounts.get(s1).put(s2, 1);
+						}
+					}
+					else {
+						Map<String, Integer> count = new HashMap<String, Integer>();
+						count.put(s2, 1);
+						pieceCounts.put(s1, count);
+					}
+					
+				}
+			}
+			
+			//Go through the map, add edges as needed
+			Iterator<String> strItr = pieceCounts.keySet().iterator();
+			while(strItr.hasNext()) {
+				String vertexValue = strItr.next();
+				Iterator<String> innerCountItr = pieceCounts.get(vertexValue).keySet().iterator();
+				while(innerCountItr.hasNext()) {
+					String vertex2Value = innerCountItr.next();
+					int similarCount = pieceCounts.get(vertexValue).get(vertex2Value);
+					lego.addEdge(new Edge<String, Double>(new Vertex<String>(vertexValue), new Vertex<String>(vertex2Value), 1.0/similarCount));
+				}
+				
+				lego.addEdge(new Edge<String, Double>(new Vertex<String>(vertexValue), new Vertex<String>(vertexValue), 0.0));
+			}
+			
+		}
+	}
+	
+	public String findPath(String PART1, String PART2) {
+		
+		return "";
+	}
+	
+	public static void main(String[] args) {
+		LegoPaths lp = new LegoPaths();
+	
+		lp.createNewGraph("data/lego1960.csv");
+	
+	}
+}

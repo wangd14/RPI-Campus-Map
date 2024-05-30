@@ -1,0 +1,58 @@
+package hw8;
+
+import javafx.event.ActionEvent;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Circle;
+
+public class CampusMapController {
+    private final CampusMapView mapView;
+    private Circle selectedCircle1;
+    private Circle selectedCircle2;
+
+    public CampusMapController(CampusMapView mapView) {
+        this.mapView = mapView;
+
+        // Attach event handlers
+        mapView.resetButton.setOnAction(this::handleReset);
+        mapView.zoomInButton.setOnAction(this::handleZoomIn);
+        mapView.zoomOutButton.setOnAction(this::handleZoomOut);
+    }
+
+    public void handleCircleClicked(Circle circle) {
+        if (selectedCircle1 == null) {
+            selectedCircle1 = circle;
+            mapView.showMessage("First circle selected: " + circle.getId());
+            mapView.removeCircle(circle);
+            circle.setFill(Color.BLUE);
+        } else if (selectedCircle2 == null && circle != selectedCircle1) {
+            selectedCircle2 = circle;
+            mapView.showMessage("Second circle selected: " + circle.getId());
+            circle.setFill(Color.BLUE);
+
+            // Call a function with the IDs of both circles
+            // Update the view with the path
+            // Reset selected circles
+        }
+    }
+
+    private void handleReset(ActionEvent event) {
+        // Reset selected circles
+        selectedCircle1 = null;
+        selectedCircle2 = null;
+
+        // Clear all paths drawn on the map
+        // Reset the view to its default state
+    }
+
+    private void handleZoomIn(ActionEvent event) {
+        // Zoom in logic
+    }
+
+    private void handleZoomOut(ActionEvent event) {
+        // Zoom out logic
+    }
+}
